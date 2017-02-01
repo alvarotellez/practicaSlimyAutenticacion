@@ -4,7 +4,7 @@
 class DbHandler {
 
     private $conn;
-
+    //Constructor que genera una nueva conexion a la BD
     function __construct() {
         require_once dirname(__FILE__) . '/DbConnect.php';
 
@@ -49,7 +49,7 @@ class DbHandler {
         return $response;
     }
 
-//Comprobacion de la password
+    //Comprobacion de la password
     public function checkLogin($email, $password) {
 
         $stmt = $this->conn->prepare("SELECT password_hash FROM users WHERE email = ?");
@@ -82,8 +82,7 @@ class DbHandler {
             return FALSE;
         }
     }
-
-//Comprobacion de que el usuario existe
+    //Comprobacion de que el usuario existe
     private function isUserExists($email) {
         $stmt = $this->conn->prepare("SELECT id from users WHERE email = ?");
         $stmt->bind_param("s", $email);
@@ -93,8 +92,7 @@ class DbHandler {
         $stmt->close();
         return $num_rows > 0;
     }
-
-//Sacamos el usuario por email
+    //Sacamos el usuario por email
     public function getUserByEmail($email) {
         $stmt = $this->conn->prepare("SELECT name, email, api_key, status, created_at FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
@@ -114,14 +112,11 @@ class DbHandler {
             return NULL;
         }
     }
-
-//Obtenemos la apiKey por el id
+    //Obtenemos la apiKey por el id
     public function getApiKeyById($user_id) {
         $stmt = $this->conn->prepare("SELECT api_key FROM users WHERE id = ?");
         $stmt->bind_param("i", $user_id);
         if ($stmt->execute()) {
-            // $api_key = $stmt->get_result()->fetch_assoc();
-            // TODO
             $stmt->bind_result($api_key);
             $stmt->close();
             return $api_key;
@@ -130,15 +125,13 @@ class DbHandler {
         }
     }
 
-//Obtener el usuario por id
+    //Obtener el usuario por id
     public function getUserId($api_key) {
         $stmt = $this->conn->prepare("SELECT id FROM users WHERE api_key = ?");
         $stmt->bind_param("s", $api_key);
         if ($stmt->execute()) {
             $stmt->bind_result($user_id);
             $stmt->fetch();
-            // TODO
-            // $user_id = $stmt->get_result()->fetch_assoc();
             $stmt->close();
             return $user_id;
         } else {
@@ -146,7 +139,7 @@ class DbHandler {
         }
     }
 
-//Comprobacion de que la api_key es correcta
+    //Comprobacion de que la KEY es correcta
     public function isValidApiKey($api_key) {
         $stmt = $this->conn->prepare("SELECT id from users WHERE api_key = ?");
         $stmt->bind_param("s", $api_key);
@@ -157,16 +150,13 @@ class DbHandler {
         return $num_rows > 0;
     }
 
-    /**
-     * Generacion del string de MD5
-     */
+    //Generacion de la Key en MD5
     private function generateApiKey() {
         return md5(uniqid(rand(), true));
     }
 
-    /* ------------- Metodos para la tabla tarea------------------ */
 
-//Cracion de una nueva tarea
+    //Cracion de una nueva tarea
     public function createTask($user_id, $task) {
         $stmt = $this->conn->prepare("INSERT INTO tasks(task) VALUES(?)");
         $stmt->bind_param("s", $task);
@@ -187,15 +177,13 @@ class DbHandler {
         }
     }
 
-//Obtenemos una tarea concreta
+    //Obtenemos una tarea concreta
     public function getTask($task_id, $user_id) {
         $stmt = $this->conn->prepare("SELECT t.id, t.task, t.status, t.created_at from tasks t, user_tasks ut WHERE t.id = ? AND ut.task_id = t.id AND ut.user_id = ?");
         $stmt->bind_param("ii", $task_id, $user_id);
         if ($stmt->execute()) {
             $res = array();
             $stmt->bind_result($id, $task, $status, $created_at);
-            // TODO
-            // $task = $stmt->get_result()->fetch_assoc();
             $stmt->fetch();
             $res["id"] = $id;
             $res["task"] = $task;
@@ -208,7 +196,7 @@ class DbHandler {
         }
     }
 
-//Obtenemos todas las tareas
+    //Obtenemos todas las tareas
     public function getAllUserTasks($user_id) {
         $stmt = $this->conn->prepare("SELECT t.* FROM tasks t, user_tasks ut WHERE t.id = ut.task_id AND ut.user_id = ?");
         $stmt->bind_param("i", $user_id);
@@ -218,7 +206,7 @@ class DbHandler {
         return $tasks;
     }
 
-//Actualizacion de las tareas
+    //Actualizacion de las tareas
     public function updateTask($user_id, $task_id, $task, $status) {
         $stmt = $this->conn->prepare("UPDATE tasks t, user_tasks ut set t.task = ?, t.status = ? WHERE t.id = ? AND t.id = ut.task_id AND ut.user_id = ?");
         $stmt->bind_param("siii", $task, $status, $task_id, $user_id);
@@ -228,7 +216,7 @@ class DbHandler {
         return $num_affected_rows > 0;
     }
 
-//Eliminando una tarea
+    //Eliminando una tarea
     public function deleteTask($user_id, $task_id) {
         $stmt = $this->conn->prepare("DELETE t FROM tasks t, user_tasks ut WHERE t.id = ? AND ut.task_id = t.id AND ut.user_id = ?");
         $stmt->bind_param("ii", $task_id, $user_id);
@@ -238,9 +226,7 @@ class DbHandler {
         return $num_affected_rows > 0;
     }
 
-    /* ------------- Metodos para la tabla user_tasks------------------ */
-
-//Funcion que asigna la tarea al usuario que la ha creado
+    //Funcion que asigna la tarea al usuario que la ha creado
     public function createUserTask($user_id, $task_id) {
         $stmt = $this->conn->prepare("INSERT INTO user_tasks(user_id, task_id) values(?, ?)");
         $stmt->bind_param("ii", $user_id, $task_id);

@@ -45,9 +45,7 @@ function authenticate(\Slim\Route $route) {
     }
 }
 
-/**
- * ----------- METODOS SIN AUTENTICACION ---------------------------------
-**/
+//Metodos sin autenticacion
 $app->post('/register', function() use ($app) {
             // Comprobamos que los parametros se han introducido
             verifyRequiredParams(array('name', 'email', 'password'));
@@ -115,10 +113,8 @@ $app->post('/login', function() use ($app) {
             echoRespnse(200, $response);
         });
 
-/*
- * ------------------------ METODOS CON AUTENTICACION ------------------------
- * Para poderlos usar tiene que estar logeado y tener la api_key
- */
+//Metodos con autencacion
+//Para poder usarlo el usuario tiene que estar logeado
 
 $app->get('/tasks', 'authenticate', function() {
             global $user_id;
@@ -143,11 +139,7 @@ $app->get('/tasks', 'authenticate', function() {
             echoRespnse(200, $response);
         });
 
-/*
- *
- * Obtener una tarea concreta
- *
- * */
+//Obtener una tarea concreta
 $app->get('/tasks/:id', 'authenticate', function($task_id) {
             global $user_id;
             $response = array();
@@ -170,10 +162,7 @@ $app->get('/tasks/:id', 'authenticate', function($task_id) {
             }
         });
 
-/*
- * Creación de una nueva tarea
- *
- * */
+//Crear una nueva tarea
 $app->post('/tasks', 'authenticate', function() use ($app) {
             // check for required params
             verifyRequiredParams(array('task'));
@@ -184,7 +173,7 @@ $app->post('/tasks', 'authenticate', function() use ($app) {
             global $user_id;
             $db = new DbHandler();
 
-            // creating new task
+            // Creacion de la tarea en la BD
             $task_id = $db->createTask($user_id, $task);
 
             if ($task_id != NULL) {
@@ -198,12 +187,7 @@ $app->post('/tasks', 'authenticate', function() use ($app) {
                 echoRespnse(200, $response);
             }            
         });
-
-/*
-*
-* Actualizar una tarea
-*
-*/
+//Actualizar una tarea
 $app->put('/tasks/:id', 'authenticate', function($task_id) use($app) {
             // check for required params
             verifyRequiredParams(array('task', 'status'));
@@ -222,20 +206,15 @@ $app->put('/tasks/:id', 'authenticate', function($task_id) use($app) {
                 $response["error"] = false;
                 $response["message"] = "Tarea actualizada correctamente";
             } else {
-                // task failed to update
+                //Error que mostramos cuando no se puede actualizar la tarea
                 $response["error"] = true;
                 $response["message"] = "Tarea imposible de actualizar. Intentalo de nuevo";
             }
             echoRespnse(200, $response);
         });
 
-/*
- *
- * Eliminar una tarea
- * Cada usuario solo puede eliminar una tarea que el haya creado
- *
- *
- * */
+//Eliminar una tarea
+//Los usuarios solo pueden borrar sus propias tareas
 $app->delete('/tasks/:id', 'authenticate', function($task_id) use($app) {
             global $user_id;
 
@@ -254,9 +233,7 @@ $app->delete('/tasks/:id', 'authenticate', function($task_id) use($app) {
             echoRespnse(200, $response);
         });
 
-/**
- * Verificacion si los parametros estan introducidos o no
- */
+//Verificaion de que los parametros estan introducidos
 function verifyRequiredParams($required_fields) {
     $error = false;
     $error_fields = "";
@@ -276,12 +253,13 @@ function verifyRequiredParams($required_fields) {
 
     if ($error) {
         // Decimos que parametros faltan
-        // Pintamos el error y detenemos la aplicacion
+        // Pintamos el error
         $response = array();
         $app = \Slim\Slim::getInstance();
         $response["error"] = true;
         $response["message"] = 'Campo(s) requerido(s) ' . substr($error_fields, 0, -2) . ' no se encuentran o están vacios';
         echoRespnse(400, $response);
+        //Detenemos la aplicacion
         $app->stop();
     }
 }
@@ -299,17 +277,13 @@ function validateEmail($email) {
     }
 }
 
-/**
- * Echoing json response to client
- * @param String $status_code Http response code
- * @param Int $response Json response
- */
+//Respuesta al cliente
 function echoRespnse($status_code, $response) {
     $app = \Slim\Slim::getInstance();
-    // Http response code
+    //Codigo de respuesta
     $app->status($status_code);
 
-    // setting response content type to json
+    // JSon de Respuesta
     $app->contentType('application/json');
 
     echo json_encode($response);

@@ -1,8 +1,6 @@
 <?php
 
-/*
- * Clase para el hash de la password
- * */
+//CLASE PARA CREAR EL HASH
 class PassHash {
 
 
@@ -10,7 +8,7 @@ class PassHash {
 
     private static $cost = '$10';
 
-    // mainly for internal use
+    //Lo usa el hash internamente
     public static function unique_salt() {
         return substr(sha1(mt_rand()), 0, 22);
     }

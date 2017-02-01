@@ -1,9 +1,6 @@
 <?php
 
-/**
- * Clase manejadora de la conexion
- *
- */
+//Clase manejadora de la conexion a la BD
 class DbConnect {
 
     private $conn;
